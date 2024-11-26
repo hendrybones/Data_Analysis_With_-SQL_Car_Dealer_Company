@@ -1,4 +1,5 @@
-
+-- USING DATABASE
+USE [Car dealers];
 
 -- List all columns and their 
 EXEC sp_help 'Customer';
@@ -88,13 +89,60 @@ GROUP BY c.First_name,c.last_name,ca.Make,s.PaymentMethod
 Order by s.PaymentMethod
 
 --Here’s how you can query distinct revenue and sales per payment method:
+SELECT s.PaymentMethod,COUNT(DISTINCT s.SaleID) AS Distinct_Sales,SUM(DISTINCT s.SalePrice) AS Distinct_Revenue
+FROM Sales s
+GROUP BY s.PaymentMethod
+ORDER BY s.PaymentMethod;
+-- Calculating total profit generated monthly by car
+
+SELECT FORMAT(s.SaleDate,'yyyy-MM'),ca.Make, SUM(s.SalePrice) Total_sale,SUM(ca.Price) AS Total_Revenue, sum(s.SalePrice - ca.Price) as Profit
+FROM Sales s
+JOIN Cars ca ON ca.CarID =s.CarID
+GROUP BY s.SaleDate,Make
+ORDER BY Profit desc;
+
+
+-- Calculating total profit generated quartely 
+
 SELECT 
-    s.PaymentMethod,
-    COUNT(DISTINCT s.SaleID) AS Distinct_Sales,
-    SUM(DISTINCT s.SalePrice) AS Distinct_Revenue
-FROM 
-    Sales s
-GROUP BY 
-    s.PaymentMethod
-ORDER BY 
-    s.PaymentMethod;
+    DATEPART(YEAR, s.SaleDate) AS Sale_Year,'Q' + CAST(DATEPART(QUARTER, s.SaleDate) AS VARCHAR) AS Quarter,
+    ca.Make, SUM(s.SalePrice) AS Total_Sale, SUM(ca.Price) AS Total_Cost, SUM(s.SalePrice - ca.Price) AS Profit
+FROM  Sales s
+JOIN Cars ca ON ca.CarID = s.CarID
+GROUP BY DATEPART(YEAR, s.SaleDate), DATEPART(QUARTER, s.SaleDate), ca.Make
+ORDER BY Sale_Year, Quarter, Profit DESC;
+
+-- Visualize Trends
+-- Yearly Revenue
+SELECT YEAR(SaleDate) AS Sale_Year, SUM(SalePrice) AS Yearly_Revenue
+FROM Sales
+GROUP BY YEAR(SaleDate)
+ORDER BY Sale_Year;
+
+--- Advanced Insights
+-- Identify High-Value Customers
+
+SELECT CustomerID, SUM(SalePrice) As Total_Spent
+FROM Sales 
+GROUP BY CustomerID
+HAVING SUM(SalePrice) > 5
+ORDER BY Total_Spent desc;
+
+-- Identify the highest-spending customers and their purchase details:
+SELECT c.CustomerID,c.First_name,c.Last_name, COUNT(s.SaleID) AS Total_purchases,SUM(s.SalePrice) AS Total_Spent
+FROM  Customer c
+JOIN Sales s ON c.CustomerID = s.CustomerID
+GROUP BY  c.CustomerID, c.First_name, c.last_name
+ORDER BY Total_Spent DESC;
+
+-- Analyze which car models generate the most revenue:
+SELECT ca.Make,ca.Model,
+    COUNT(s.SaleID) AS Total_Sales,
+    SUM(s.SalePrice) AS Revenue
+FROM Cars ca
+JOIN  Sales s ON ca.CarID = s.CarID
+GROUP BY  ca.Make, ca.Model
+ORDER BY  Revenue DESC;
+
+-- Find customers who purchased multiple cars:
+

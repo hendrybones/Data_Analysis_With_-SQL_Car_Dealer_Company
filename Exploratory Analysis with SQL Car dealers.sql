@@ -107,5 +107,49 @@ ORDER BY  Make DESC;
 
 SELECT (CASE WHEN SalePrice >= 2 THEN SUM(Saleprice) ELSE 0 END) as Total_Sales
 FROM Sales
-Group by SaleID,SalePrice
+Group by SalePrice
 ORDER BY SalePrice DESC;
+
+
+-- Working with IF statement SQL server we use case
+
+SELECT 
+       CASE WHEN year >= 2023 THEN 'NEW MODEL'
+	   ELSE 'OLD MODEL'
+	   END AS MODELS 
+FROM Cars
+Group by year
+
+-- Data Cleaning
+SELECT DISTINCT * FROM customer;
+
+-- Replacing null values with default SELECT IFNULL (column, ‘default’) FROM table name;
+-- Trimming Whitespaces: SELECT TRIM (column) FROM table name;
+-- Handling Missing Data 
+
+SELECT * FROM Cars
+WHERE CarID IS NOT NULL;
+
+-- Advanced Aggregation.
+
+---Roll up for subtitles
+
+SELECT Make, Model,SUM(Price) Total_Revenue
+FROM Cars
+GROUP BY Make,Model WITH ROLLUP
+
+--GROUPING SETS
+SELECT Model, Color, SUM(Price) Total_Revenue
+FROM Cars
+
+GROUP BY GROUPING SETS((Model), (Color))
+
+-- Windows Functions for Running totals;
+SELECT DISTINCT Make,SUM(price) OVER (Order by Make)as Total_Price
+FROM Cars
+
+-- RANKING WITHIN GROUP
+SELECT  Make, RANK() OVER(partition by Make ORDER BY Price) AS Total_Price
+FROM Cars
+
+-- 

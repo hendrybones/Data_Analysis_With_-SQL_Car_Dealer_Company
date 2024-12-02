@@ -145,4 +145,34 @@ GROUP BY  ca.Make, ca.Model
 ORDER BY  Revenue DESC;
 
 -- Find customers who purchased multiple cars:
+SELECT c.First_name, c.Last_name, 
+    COUNT(ca.CarID) as Total_cars
+From Customer c
+JOIN Sales s ON s.CustomerID =c.CustomerID
+LEFT JOIN Cars ca ON ca.CarID =s.CarID
+GROUP BY c.First_name,c.last_name
+ORDER BY Total_cars desc;
 
+-- Exploring dealers and Service records 
+SELECT * FROM Dealer
+SELECT * FROM ServiceRecords
+
+--- Which car model is more costly to service
+SELECT c.Model, Sum(s.cost) as Total_cost
+FROM Cars c
+JOIN ServiceRecords s ON s.CarID =c.CarID
+GROUP BY c.model
+ORDER BY Total_cost desc;
+
+-- The total cost of purchansing a car from the initial cost, the selling price and the cost of maintaning the car.
+SELECT c.Model, 
+       Sum(c.cost)as Initial_Price,
+	   SUM(s.SalePrice) as Revenue,
+	   ((s.SalePrice)-(c.cost)) as profit
+	   SUM(s.cost) as Service_cost,
+	   Sum(Initial_Price,Revenue,Service_cost) as Total_c
+FROM Cars c
+JOIN ON Sales s ON s.SalePrice=c.
+GROUP BY c.model
+ORDER BY Total_cost
+        
